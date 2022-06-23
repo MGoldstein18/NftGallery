@@ -1,86 +1,152 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import {
+  Button,
+  FormControl,
+  Heading,
+  Input,
+  VStack,
+  FormLabel,
+  Switch,
+  HStack,
+  SimpleGrid,
+  Divider,
+  Text
+} from '@chakra-ui/react';
+import type { NextPage } from 'next';
+import { useState } from 'react';
+import NftCard from '../components/NftCard';
 
 const Home: NextPage = () => {
+  const [wallet, setWallet] = useState('');
+  const [collection, setCollection] = useState('');
+  const [NFTs, setNFTs] = useState<any[]>([]);
+  const [fetchByCollection, setFetchByCollection] = useState(false);
+
+  const handleWalletChange = (e: any) => {
+    setWallet(e.target.value);
+  };
+
+  const handleCollectionChange = (e: any) => {
+    setCollection(e.target.value);
+  };
+
+  const handleCheckedChange = (e: any) => {
+    setFetchByCollection(e.target.checked);
+  };
+
+  const fetchNfts = async () => {
+    let nfts;
+    const baseUrl = `https://eth-mainnet.alchemyapi.io/v2/${process.env.NEXT_PUBLIC_API_KEY}/getNFTs/`;
+
+    const requestOptions = {
+      method: 'GET'
+    };
+
+    try {
+      if (!collection.length) {
+        const fetchUrl = `${baseUrl}?owner=${wallet}`;
+        nfts = await fetch(fetchUrl, requestOptions).then((data) =>
+          data.json()
+        );
+      } else {
+        const fetchUrl = `${baseUrl}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
+        nfts = await fetch(fetchUrl, requestOptions).then((data) =>
+          data.json()
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (nfts) {
+      console.log('nfts:', nfts);
+      setNFTs(nfts.ownedNfts);
+    }
+
+    setWallet('');
+    setCollection('');
+  };
+
+  const fetchNftsByCollection = async () => {
+    if (!collection.length) {
+      alert('Please add a collection address!');
+      return 'No collection address';
+    }
+
+    const requestOptions = {
+      method: 'GET'
+    };
+
+    const baseUrl = `https://eth-mainnet.alchemyapi.io/v2/${process.env.NEXT_PUBLIC_API_KEY}/getNFTsForCollection/`;
+    const fetchUrl = `${baseUrl}?contractAddress=${collection}&withMetadata=${'true'}`;
+
+    const nfts = await fetch(fetchUrl, requestOptions).then((data) =>
+      data.json()
+    );
+
+    if (nfts) {
+      console.log('nfts:', nfts);
+      setNFTs(nfts.nfts);
+    }
+
+    setWallet('');
+    setCollection('');
+  };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <VStack spacing={'5'} m='3rem'>
+      <Heading m='2rem'>Search for NFTs</Heading>
+      <VStack width={'100%'} spacing={'5'}>
+        <FormControl width={'50%'}>
+          <Input
+            variant={'filled'}
+            disabled={fetchByCollection}
+            onChange={handleWalletChange}
+            value={wallet}
+            type={'text'}
+            placeholder='Wallet address'
+          ></Input>
+        </FormControl>
+        <FormControl width={'50%'}>
+          {' '}
+          <Input
+            variant={'filled'}
+            onChange={handleCollectionChange}
+            value={collection}
+            type={'text'}
+            placeholder='Collection address'
+          ></Input>
+        </FormControl>
+        <HStack textAlign={'center'} width={'50%'}>
+          <Switch onChange={handleCheckedChange} />
+          <FormLabel textAlign={'center'}>Fetch by collection only</FormLabel>
+        </HStack>
+        <Button
+          w='50%'
+          size={'lg'}
+          colorScheme={'purple'}
+          onClick={fetchByCollection ? fetchNftsByCollection : fetchNfts}
         >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
-    </div>
-  )
-}
+          Search
+        </Button>
+      </VStack>
+      <Divider />
+      <VStack>
+        <Heading m='3rem'>NFT Gallery</Heading>
+        {NFTs.length > 0 ? (
+          <SimpleGrid margin={'3rem'} spacing={5} columns={3}>
+            {NFTs.length &&
+              NFTs.map((nft) => {
+                return <NftCard key={NFTs.indexOf(nft)} nft={nft}></NftCard>;
+              })}
+          </SimpleGrid>
+        ) : (
+          <VStack textAlign={'center'}>
+            <Text fontStyle={'italic'}>Your search results will be displayed here...</Text>
+          </VStack>
+        )}
+      </VStack>
+    </VStack>
+  );
+};
 
-export default Home
+export default Home;
