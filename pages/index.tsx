@@ -49,9 +49,11 @@ const Home: NextPage = () => {
         );
       } else {
         const fetchUrl = `${baseUrl}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-        nfts = await fetch(fetchUrl, requestOptions).then((data) =>
-          data.json()
-        );
+        nfts = await fetch(fetchUrl, requestOptions).then((data) => {
+          console.log('data', data);
+          console.log('json', data.json())
+          return data.json();
+        });
       }
     } catch (error) {
       console.error(error);
@@ -141,7 +143,9 @@ const Home: NextPage = () => {
           </SimpleGrid>
         ) : (
           <VStack textAlign={'center'}>
-            <Text fontStyle={'italic'}>Your search results will be displayed here...</Text>
+            <Text fontStyle={'italic'}>
+              Your search results will be displayed here...
+            </Text>
           </VStack>
         )}
       </VStack>
