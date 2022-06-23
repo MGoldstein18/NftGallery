@@ -44,14 +44,16 @@ const Home: NextPage = () => {
     try {
       if (!collection.length) {
         const fetchUrl = `${baseUrl}?owner=${wallet}`;
-        nfts = await fetch(fetchUrl, requestOptions).then((data) =>
-          data.json()
-        );
+        nfts = await fetch(fetchUrl, requestOptions).then((data) => {
+          console.log('data', data);
+          console.log('json', data.json());
+          return data.json();
+        });
       } else {
         const fetchUrl = `${baseUrl}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
         nfts = await fetch(fetchUrl, requestOptions).then((data) => {
           console.log('data', data);
-          console.log('json', data.json())
+          console.log('json', data.json());
           return data.json();
         });
       }
