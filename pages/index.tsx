@@ -42,20 +42,20 @@ const Home: NextPage = () => {
     };
 
     try {
+      if(wallet === '') {
+        alert('A wallet address is required!')
+        return;
+      }
       if (!collection.length) {
         const fetchUrl = `${baseUrl}?owner=${wallet}`;
-        nfts = await fetch(fetchUrl, requestOptions).then(async (data) => {
-          console.log('data', data);
-          console.log('json', await data.json());
-          return await data.json();
-        });
+        nfts = await fetch(fetchUrl, requestOptions).then(
+          async (data) => await data.json()
+        );
       } else {
         const fetchUrl = `${baseUrl}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-        nfts = await fetch(fetchUrl, requestOptions).then(async (data) => {
-          console.log('data', data);
-          console.log('json', await data.json());
-          return await data.json();
-        });
+        nfts = await fetch(fetchUrl, requestOptions).then(
+          async (data) => await data.json()
+        );
       }
     } catch (error) {
       console.error(error);
