@@ -79,7 +79,7 @@ const NftCard = ({
           <PopoverContent>
             <PopoverArrow />
             <PopoverCloseButton />
-            <PopoverHeader fontWeight={'bold'}>Full Address</PopoverHeader>
+            <PopoverHeader fontWeight={'bold'}>Full Description</PopoverHeader>
             <PopoverBody>{nft.description}</PopoverBody>
           </PopoverContent>
         </Popover>
